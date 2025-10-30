@@ -25,21 +25,21 @@ export const DAYS_OF_WEEK = [
   'Tuesday', 
   'Wednesday',
   'Thursday',
-  'Friday',
-  'Saturday'
+  'Friday'
 ];
 
 // Default Time Slots (can be customized by admin)
 export const DEFAULT_TIME_SLOTS = [
-  { id: 1, startTime: '09:00', endTime: '10:00', isLunch: false },
-  { id: 2, startTime: '10:00', endTime: '11:00', isLunch: false },
-  { id: 3, startTime: '11:00', endTime: '12:00', isLunch: false },
-  { id: 4, startTime: '12:00', endTime: '13:00', isLunch: true },  // Lunch
-  { id: 5, startTime: '13:00', endTime: '14:00', isLunch: false },
-  { id: 6, startTime: '14:00', endTime: '15:00', isLunch: false },
-  { id: 7, startTime: '15:00', endTime: '16:00', isLunch: false },
-  { id: 8, startTime: '16:00', endTime: '17:00', isLunch: false }
+  { id: '1', startTime: '09:00', endTime: '10:00', isLunch: false },
+  { id: '2', startTime: '10:00', endTime: '11:00', isLunch: false },
+  { id: '3', startTime: '11:00', endTime: '12:00', isLunch: false },
+  { id: '4', startTime: '12:00', endTime: '13:00', isLunch: true },
+  { id: '5', startTime: '13:00', endTime: '14:00', isLunch: false },
+  { id: '6', startTime: '14:00', endTime: '15:00', isLunch: false },
+  { id: '7', startTime: '15:00', endTime: '16:00', isLunch: false },
+  { id: '8', startTime: '16:00', endTime: '17:00', isLunch: false }
 ];
+
 
 // Data Structure Definitions
 export const DATA_MODELS = {

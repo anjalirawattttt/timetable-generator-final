@@ -1,101 +1,155 @@
 // src/components/faculty/GenerateMonitoringTimetable.jsx
 
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useData } from '../../context/DataContext.jsx';
-import { useTimetable } from '../../context/TimetableContext.jsx';
-import TimetableGrid from '../timetable/TimetableGrid.jsx';
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useData } from "../../context/DataContext.jsx";
+import { useTimetable } from "../../context/TimetableContext.jsx";
+import TimetableGrid from "../timetable/TimetableGrid.jsx";
 
 const GenerateMonitoringTimetable = () => {
   const { user } = useAuth();
   const { divisions, subjects, faculties, classrooms, timeSlots } = useData();
-  const { timetables, generating, setGenerating, saveTimetable, getTimetableByDivision } = useTimetable();
+  const {
+    timetables,
+    generating,
+    setGenerating,
+    saveTimetable,
+    getTimetableByDivision,
+  } = useTimetable();
   const [generatedTimetable, setGeneratedTimetable] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Get faculty's monitoring division
-  const monitoringDivision = divisions.find(d => d.id === user.monitoringDivision);
+  const monitoringDivision = divisions.find(
+    (d) => d.id === user.monitoringDivision
+  );
   const existingTimetable = getTimetableByDivision(user.monitoringDivision);
 
-  // Simple timetable generation algorithm
+  // Timetable generation function
   const generateTimetable = async () => {
+    console.log("Button clicked - starting generation");
+
     if (!monitoringDivision) {
-      setError('No monitoring division assigned');
+      setError("No monitoring division assigned");
       return;
     }
 
     setGenerating(true);
-    setError('');
+    setError("");
 
     try {
-      // Simulate generation delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log("Generation started for division:", monitoringDivision.name);
 
-      const divisionSubjects = subjects.filter(s => monitoringDivision.subjects?.includes(s.id));
-      const availableClassrooms = classrooms.filter(c => 
-        c.capacity >= monitoringDivision.studentCount
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const divisionSubjects = subjects.filter((s) =>
+        monitoringDivision.subjects?.includes(s.id)
       );
-      const lectureSlots = timeSlots.filter(slot => !slot.isLunch);
+
+      const availableClassrooms = classrooms.filter(
+        (c) => c.capacity >= monitoringDivision.studentCount
+      );
+
+      const lectureSlots = timeSlots.filter((slot) => !slot.isLunch);
+
+      console.log("Division subjects:", divisionSubjects.length);
+      console.log("Available classrooms:", availableClassrooms.length);
+      console.log("Lecture slots:", lectureSlots.length);
 
       if (divisionSubjects.length === 0) {
-        throw new Error('No subjects assigned to this division');
+        throw new Error("No subjects assigned to this division");
       }
 
       if (availableClassrooms.length === 0) {
-        throw new Error('No suitable classrooms available');
+        throw new Error("No suitable classrooms available");
       }
 
-      // Generate timetable entries
+      if (lectureSlots.length === 0) {
+        throw new Error("No lecture time slots available");
+      }
+
+      // Generate entries for ALL days
       const entries = [];
-      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
       let subjectIndex = 0;
-      let slotIndex = 0;
 
-      // Simple round-robin assignment
-      for (const day of days) {
-        for (const slot of lectureSlots) {
-          if (subjectIndex < divisionSubjects.length) {
-            const subject = divisionSubjects[subjectIndex];
-            
-            // Find faculty teaching this subject
-            const subjectFaculty = faculties.find(f => 
-              f.subjects?.includes(subject.id)
-            );
+      // FIXED: Ensure we generate for all days
+      days.forEach((day, dayIndex) => {
+        console.log(`Generating for ${day}`);
 
-            // Find appropriate classroom
-            const classroom = availableClassrooms.find(c => 
-              subject.type === 'Lab' ? c.type === 'Lab' : c.type === 'Theory'
-            ) || availableClassrooms[0];
+        lectureSlots.forEach((slot, slotIndex) => {
+          const subject =
+            divisionSubjects[subjectIndex % divisionSubjects.length];
 
-            entries.push({
-              id: `entry_${Date.now()}_${entries.length}`,
-              divisionId: monitoringDivision.id,
-              day,
-              timeSlotId: slot.id,
-              subjectId: subject.id,
-              facultyId: subjectFaculty?.id || faculties[0]?.id,
-              classroomId: classroom.id,
-              isLunch: false
-            });
+          // Find faculty who teaches this subject
+          const subjectFaculty = faculties.find((f) =>
+            f.subjects?.includes(subject.id)
+          );
 
-            subjectIndex = (subjectIndex + 1) % divisionSubjects.length;
-          }
-        }
-      }
+          // Find appropriate classroom
+          const appropriateClassroom = availableClassrooms.find((c) => {
+            const typeMatch =
+              subject.type === "Lab" ? c.type === "Lab" : c.type === "Theory";
+            return typeMatch && c.capacity >= monitoringDivision.studentCount;
+          });
+
+          const finalClassroom =
+            appropriateClassroom ||
+            availableClassrooms.find(
+              (c) => c.capacity >= monitoringDivision.studentCount
+            ) ||
+            availableClassrooms[0];
+
+          const finalFaculty = subjectFaculty || faculties[0];
+
+          console.log(
+            `Creating entry for ${day}, slot ${slot.id}, subject ${subject.name}`
+          );
+
+          entries.push({
+            id: `entry_${dayIndex}_${slotIndex}_${Date.now()}`,
+            divisionId: monitoringDivision.id,
+            day: day,
+            timeSlotId: slot.id,
+            subjectId: subject.id,
+            facultyId: finalFaculty.id,
+            classroomId: finalClassroom.id,
+            isLunch: false,
+          });
+
+          subjectIndex++;
+        });
+      });
+
+      console.log(
+        `Generated ${entries.length} entries for ${days.length} days`
+      );
+      console.log(
+        "Entries by day:",
+        entries.reduce((acc, entry) => {
+          acc[entry.day] = (acc[entry.day] || 0) + 1;
+          return acc;
+        }, {})
+      );
 
       const newTimetable = {
         id: `tt_${Date.now()}`,
         divisionId: monitoringDivision.id,
         generatedBy: user.id,
         generatedAt: new Date().toISOString(),
-        entries,
-        conflicts: []
+        entries: entries,
+        conflicts: [],
       };
 
+      console.log(
+        "Final timetable with",
+        newTimetable.entries.length,
+        "entries"
+      );
       setGeneratedTimetable(newTimetable);
-
     } catch (err) {
-      setError(err.message);
+      console.error("Generation error:", err);
+      setError(`Generation failed: ${err.message}`);
     } finally {
       setGenerating(false);
     }
@@ -105,7 +159,7 @@ const GenerateMonitoringTimetable = () => {
     if (generatedTimetable) {
       saveTimetable(generatedTimetable);
       setGeneratedTimetable(null);
-      alert('Timetable saved successfully!');
+      alert("Timetable saved successfully!");
     }
   };
 
@@ -113,13 +167,17 @@ const GenerateMonitoringTimetable = () => {
     setGeneratedTimetable(null);
   };
 
+  // If no monitoring division assigned
   if (!monitoringDivision) {
     return (
       <div className="generate-timetable">
         <h2>Generate Timetable</h2>
         <div className="no-monitoring">
           <p>You are not assigned as a monitor for any division.</p>
-          <p>Please contact the administrator to assign you a monitoring division.</p>
+          <p>
+            Please contact the administrator to assign you a monitoring
+            division.
+          </p>
         </div>
       </div>
     );
@@ -127,12 +185,17 @@ const GenerateMonitoringTimetable = () => {
 
   return (
     <div className="generate-timetable">
+      {/* Page Header */}
       <div className="page-header">
         <h2>Generate Timetable - {monitoringDivision.name}</h2>
-        <p>Division: {monitoringDivision.name} | Students: {monitoringDivision.studentCount}</p>
+        <p>
+          Division: {monitoringDivision.name} | Students:{" "}
+          {monitoringDivision.studentCount} | Subjects:{" "}
+          {monitoringDivision.subjects?.length || 0}
+        </p>
       </div>
 
-      {/* Division Info */}
+      {/* Division Information Card */}
       <div className="division-info-card">
         <h3>Division Information</h3>
         <div className="info-grid">
@@ -143,10 +206,12 @@ const GenerateMonitoringTimetable = () => {
             <strong>Students:</strong> {monitoringDivision.studentCount}
           </div>
           <div>
-            <strong>Subjects:</strong> {monitoringDivision.subjects?.length || 0}
+            <strong>Subjects:</strong>{" "}
+            {monitoringDivision.subjects?.length || 0}
           </div>
           <div>
-            <strong>Status:</strong> {existingTimetable ? 'Timetable exists' : 'No timetable'}
+            <strong>Status:</strong>{" "}
+            {existingTimetable ? "Timetable exists" : "No timetable"}
           </div>
         </div>
       </div>
@@ -155,17 +220,20 @@ const GenerateMonitoringTimetable = () => {
       <div className="generation-controls">
         {existingTimetable && (
           <div className="existing-timetable-warning">
-            <p>⚠️ A timetable already exists for this division. Generating a new one will replace it.</p>
+            <p>
+              ⚠️ A timetable already exists for this division. Generating a new
+              one will replace it.
+            </p>
           </div>
         )}
 
         <div className="control-buttons">
-          <button 
+          <button
             onClick={generateTimetable}
             disabled={generating}
             className="btn-primary"
           >
-            {generating ? 'Generating...' : 'Generate New Timetable'}
+            {generating ? "Generating..." : "Generate New Timetable"}
           </button>
         </div>
 
@@ -202,7 +270,7 @@ const GenerateMonitoringTimetable = () => {
         </div>
       )}
 
-      {/* Existing Timetable */}
+      {/* Existing Timetable Display */}
       {existingTimetable && !generatedTimetable && (
         <div className="existing-timetable">
           <h3>Current Timetable</h3>

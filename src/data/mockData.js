@@ -94,67 +94,40 @@ export const MOCK_SUBJECTS = [
 
 // Sample Classrooms
 export const MOCK_CLASSROOMS = [
+  // Theory classrooms
   {
     id: 'room_001',
     name: 'Room 101',
-    type: CLASSROOM_TYPES.THEORY,
+    type: 'Theory',  // Make sure this matches CLASSROOM_TYPES.THEORY
     capacity: 60
   },
   {
     id: 'room_002',
-    name: 'Room 102',
-    type: CLASSROOM_TYPES.THEORY,
-    capacity: 50
-  },
-  {
-    id: 'room_003',
-    name: 'Room 103',
-    type: CLASSROOM_TYPES.THEORY,
-    capacity: 70
-  },
-  {
-    id: 'room_004',
-    name: 'Room 201',
-    type: CLASSROOM_TYPES.THEORY,
-    capacity: 80
-  },
-  {
-    id: 'room_005',
-    name: 'Room 202',
-    type: CLASSROOM_TYPES.THEORY,
+    name: 'Room 102', 
+    type: 'Theory',
     capacity: 60
   },
+  // Lab classrooms - INCREASE CAPACITY
   {
     id: 'lab_001',
     name: 'Computer Lab A',
-    type: CLASSROOM_TYPES.LAB,
-    capacity: 30
+    type: 'Lab',  // Make sure this matches CLASSROOM_TYPES.LAB
+    capacity: 60  // INCREASED from 30 to 60
   },
   {
     id: 'lab_002',
     name: 'Computer Lab B',
-    type: CLASSROOM_TYPES.LAB,
-    capacity: 35
+    type: 'Lab',
+    capacity: 60  // INCREASED from 35 to 60
   },
   {
     id: 'lab_003',
     name: 'Computer Lab C',
-    type: CLASSROOM_TYPES.LAB,
-    capacity: 40
-  },
-  {
-    id: 'lab_004',
-    name: 'Network Lab',
-    type: CLASSROOM_TYPES.LAB,
-    capacity: 25
-  },
-  {
-    id: 'lab_005',
-    name: 'Software Lab',
-    type: CLASSROOM_TYPES.LAB,
-    capacity: 30
+    type: 'Lab',
+    capacity: 60  // INCREASED from 40 to 60
   }
 ];
+
 
 // Sample Divisions
 export const MOCK_DIVISIONS = [
@@ -162,7 +135,7 @@ export const MOCK_DIVISIONS = [
     id: 'div_001',
     name: 'CS-A',
     monitorFacultyId: 'fac_001',
-    studentCount: 55,
+    studentCount: 30,
     subjects: ['sub_001', 'sub_002', 'sub_003', 'sub_004', 'sub_005', 'sub_007']
   },
   {
