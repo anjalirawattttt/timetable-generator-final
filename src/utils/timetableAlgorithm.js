@@ -1,6 +1,6 @@
 // src/utils/timetableAlgorithm.js
 
-import { DAYS_OF_WEEK, SUBJECT_TYPES, CLASSROOM_TYPES } from './constants.js';
+import { DAYS_OF_WEEK, SUBJECT_TYPES, CLASSROOM_TYPES } from "./constants.js";
 
 /**
  * Timetable Generation Algorithm
@@ -12,7 +12,7 @@ export class TimetableGenerator {
     this.subjects = data.subjects || [];
     this.classrooms = data.classrooms || [];
     this.divisions = data.divisions || [];
-    this.timeSlots = (data.timeSlots || []).filter(slot => !slot.isLunch);
+    this.timeSlots = (data.timeSlots || []).filter((slot) => !slot.isLunch);
     this.conflicts = [];
   }
 
@@ -23,40 +23,40 @@ export class TimetableGenerator {
    */
   generateTimetable(divisionId) {
     this.conflicts = [];
-    
+
     try {
-      const division = this.divisions.find(d => d.id === divisionId);
-      
+      const division = this.divisions.find((d) => d.id === divisionId);
+
       if (!division) {
-        throw new Error('Division not found');
+        throw new Error("Division not found");
       }
 
       // Get subjects for this division
-      const divisionSubjects = this.subjects.filter(s => 
-        division.subjects && division.subjects.includes(s.id)
+      const divisionSubjects = this.subjects.filter(
+        (s) => division.subjects && division.subjects.includes(s.id)
       );
 
       if (divisionSubjects.length === 0) {
-        throw new Error('No subjects assigned to this division');
+        throw new Error("No subjects assigned to this division");
       }
 
       // Create lecture requirements
-      const lectureRequirements = this.createLectureRequirements(divisionSubjects);
-      
+      const lectureRequirements =
+        this.createLectureRequirements(divisionSubjects);
+
       // Generate timetable entries
       const entries = this.scheduleLectures(division, lectureRequirements);
 
       return {
         id: `tt_${Date.now()}`,
         divisionId: divisionId,
-        generatedBy: 'system',
+        generatedBy: "system",
         generatedAt: new Date().toISOString(),
         entries: entries,
-        conflicts: this.conflicts
+        conflicts: this.conflicts,
       };
-
     } catch (error) {
-      console.error('Timetable generation error:', error);
+      console.error("Timetable generation error:", error);
       throw error;
     }
   }
@@ -68,17 +68,17 @@ export class TimetableGenerator {
    */
   createLectureRequirements(subjects) {
     const requirements = [];
-    
-    subjects.forEach(subject => {
+
+    subjects.forEach((subject) => {
       const lecturesPerWeek = subject.lecturesPerWeek || 1;
-      
+
       for (let i = 0; i < lecturesPerWeek; i++) {
         requirements.push({
           subjectId: subject.id,
           subject: subject,
           duration: subject.duration || 1,
           type: subject.type,
-          lectureNumber: i + 1
+          lectureNumber: i + 1,
         });
       }
     });
@@ -96,19 +96,19 @@ export class TimetableGenerator {
     const entries = [];
     const schedule = this.initializeSchedule();
 
-    // Sort requirements by priority (labs first, then theory)
     requirements.sort((a, b) => {
-      if (a.type === SUBJECT_TYPES.LAB && b.type === SUBJECT_TYPES.THEORY) return -1;
-      if (a.type === SUBJECT_TYPES.THEORY && b.type === SUBJECT_TYPES.LAB) return 1;
+      if (a.type === SUBJECT_TYPES.LAB && b.type === SUBJECT_TYPES.THEORY)
+        return -1;
+      if (a.type === SUBJECT_TYPES.THEORY && b.type === SUBJECT_TYPES.LAB)
+        return 1;
       return 0;
     });
 
-    // Try to schedule each requirement
-    requirements.forEach(req => {
+    requirements.forEach((req) => {
       const slot = this.findBestSlot(req, schedule, division);
       if (slot) {
-        const entry = this.createTimetableEntry(division.id, slot, req);
-        entries.push(entry);
+        const entryArray = this.createTimetableEntry(division.id, slot, req);
+        entries.push(...entryArray);
         this.markSlotAsOccupied(schedule, slot, req);
       } else {
         this.conflicts.push(
@@ -126,19 +126,19 @@ export class TimetableGenerator {
    */
   initializeSchedule() {
     const schedule = {};
-    
-    DAYS_OF_WEEK.forEach(day => {
+
+    DAYS_OF_WEEK.forEach((day) => {
       schedule[day] = {};
-      this.timeSlots.forEach(slot => {
+      this.timeSlots.forEach((slot) => {
         schedule[day][slot.id] = {
           faculty: null,
           classroom: null,
           subject: null,
-          occupied: false
+          occupied: false,
         };
       });
     });
-    
+
     return schedule;
   }
 
@@ -150,45 +150,78 @@ export class TimetableGenerator {
    * @returns {Object|null} Best slot or null if none found
    */
   findBestSlot(requirement, schedule, division) {
-    const availableFaculties = this.getAvailableFaculties(requirement.subjectId);
-    const availableClassrooms = this.getAvailableClassrooms(requirement.type, division.studentCount);
+    const availableFaculties = this.getAvailableFaculties(
+      requirement.subjectId
+    );
+    const availableClassrooms = this.getAvailableClassrooms(
+      requirement.type,
+      division.studentCount
+    );
 
     if (availableFaculties.length === 0) {
-      console.warn(`No faculty available for subject ${requirement.subject.name}`);
+      console.warn(
+        `No faculty available for subject ${requirement.subject.name}`
+      );
       return null;
     }
 
     if (availableClassrooms.length === 0) {
-      console.warn(`No classroom available for subject type ${requirement.type}`);
+      console.warn(
+        `No classroom available for subject type ${requirement.type}`
+      );
       return null;
     }
 
-    // Try to find a slot
+    // FIXED: Add validation for duration vs available slots
+    if (requirement.duration > this.timeSlots.length) {
+      console.warn(
+        `Subject ${requirement.subject.name} requires ${requirement.duration} slots but only ${this.timeSlots.length} available`
+      );
+      return null;
+    }
+
+    // Try to find consecutive slots for multi-duration subjects
     for (const day of DAYS_OF_WEEK) {
-      for (const timeSlot of this.timeSlots) {
-        // Check if slot is already occupied
-        if (schedule[day][timeSlot.id].occupied) continue;
+      for (let i = 0; i <= this.timeSlots.length - requirement.duration; i++) {
+        const slotsNeeded = [];
 
-        // Find available faculty for this time slot
-        const faculty = availableFaculties.find(f => 
-          this.isFacultyAvailable(f.id, day, timeSlot.id, schedule)
-        );
+        // Check if we have enough consecutive slots
+        for (let j = 0; j < requirement.duration; j++) {
+          const slot = this.timeSlots[i + j];
+          if (!slot || schedule[day][slot.id].occupied) {
+            break;
+          }
+          slotsNeeded.push(slot);
+        }
 
-        if (!faculty) continue;
+        // If we found enough consecutive slots
+        if (slotsNeeded.length === requirement.duration) {
+          // Find available faculty for all these slots
+          const faculty = availableFaculties.find((f) =>
+            slotsNeeded.every((slot) =>
+              this.isFacultyAvailable(f.id, day, slot.id, schedule)
+            )
+          );
 
-        // Find available classroom for this time slot
-        const classroom = availableClassrooms.find(c => 
-          this.isClassroomAvailable(c.id, day, timeSlot.id, schedule)
-        );
+          if (!faculty) continue;
 
-        if (!classroom) continue;
+          // Find available classroom for all these slots
+          const classroom = availableClassrooms.find((c) =>
+            slotsNeeded.every((slot) =>
+              this.isClassroomAvailable(c.id, day, slot.id, schedule)
+            )
+          );
 
-        return {
-          day,
-          timeSlot,
-          faculty,
-          classroom
-        };
+          if (!classroom) continue;
+
+          // FIXED: Always return timeSlots as array for consistency
+          return {
+            day,
+            timeSlots: slotsNeeded,
+            faculty,
+            classroom,
+          };
+        }
       }
     }
 
@@ -201,8 +234,11 @@ export class TimetableGenerator {
    * @returns {Array} Array of available faculties
    */
   getAvailableFaculties(subjectId) {
-    return this.faculties.filter(f => 
-      f.subjects && Array.isArray(f.subjects) && f.subjects.includes(subjectId)
+    return this.faculties.filter(
+      (f) =>
+        f.subjects &&
+        Array.isArray(f.subjects) &&
+        f.subjects.includes(subjectId)
     );
   }
 
@@ -213,11 +249,11 @@ export class TimetableGenerator {
    * @returns {Array} Array of available classrooms
    */
   getAvailableClassrooms(type, studentCount) {
-    const requiredType = type === SUBJECT_TYPES.LAB ? 
-      CLASSROOM_TYPES.LAB : CLASSROOM_TYPES.THEORY;
-    
-    return this.classrooms.filter(c => 
-      c.type === requiredType && c.capacity >= studentCount
+    const requiredType =
+      type === SUBJECT_TYPES.LAB ? CLASSROOM_TYPES.LAB : CLASSROOM_TYPES.THEORY;
+
+    return this.classrooms.filter(
+      (c) => c.type === requiredType && c.capacity >= studentCount
     );
   }
 
@@ -230,14 +266,9 @@ export class TimetableGenerator {
    * @returns {boolean} True if available
    */
   isFacultyAvailable(facultyId, day, timeSlotId, schedule) {
-    // Check if faculty is already assigned at this time across all days
-    for (const checkDay of DAYS_OF_WEEK) {
-      const slot = schedule[checkDay][timeSlotId];
-      if (slot && slot.faculty && slot.faculty.id === facultyId) {
-        return false;
-      }
-    }
-    return true;
+    // FIXED: More efficient - only check the specific day and time slot
+    const slot = schedule[day][timeSlotId];
+    return !(slot && slot.faculty && slot.faculty.id === facultyId);
   }
 
   /**
@@ -258,19 +289,30 @@ export class TimetableGenerator {
    * @param {string} divisionId - Division ID
    * @param {Object} slot - Selected slot
    * @param {Object} requirement - Lecture requirement
-   * @returns {Object} Timetable entry
+   * @returns {Array} Array of timetable entries
    */
   createTimetableEntry(divisionId, slot, requirement) {
-    return {
-      id: `entry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      divisionId,
-      day: slot.day,
-      timeSlotId: slot.timeSlot.id,
-      subjectId: requirement.subjectId,
-      facultyId: slot.faculty.id,
-      classroomId: slot.classroom.id,
-      isLunch: false
-    };
+    const entries = [];
+    // FIXED: Handle both single and multi-slot consistently
+    const timeSlots = slot.timeSlots || [];
+
+    timeSlots.forEach((timeSlot, index) => {
+      entries.push({
+        // FIXED: More reliable ID generation
+        id: `entry_${divisionId}_${slot.day}_${timeSlot.id}_${index}_${Date.now()}`,
+        divisionId,
+        day: slot.day,
+        timeSlotId: timeSlot.id,
+        subjectId: requirement.subjectId,
+        facultyId: slot.faculty.id,
+        classroomId: slot.classroom.id,
+        isLunch: false,
+        isMultiSlot: timeSlots.length > 1,
+        slotIndex: index,
+      });
+    });
+
+    return entries;
   }
 
   /**
@@ -280,12 +322,17 @@ export class TimetableGenerator {
    * @param {Object} requirement - Lecture requirement
    */
   markSlotAsOccupied(schedule, slot, requirement) {
-    schedule[slot.day][slot.timeSlot.id] = {
-      faculty: slot.faculty,
-      classroom: slot.classroom,
-      subject: requirement.subject,
-      occupied: true
-    };
+    // FIXED: Handle consistent timeSlots array format
+    const timeSlots = slot.timeSlots || [];
+
+    timeSlots.forEach((timeSlot) => {
+      schedule[slot.day][timeSlot.id] = {
+        faculty: slot.faculty,
+        classroom: slot.classroom,
+        subject: requirement.subject,
+        occupied: true,
+      };
+    });
   }
 }
 
@@ -300,7 +347,7 @@ export const generateTimetableForDivision = (data, divisionId) => {
     const generator = new TimetableGenerator(data);
     return generator.generateTimetable(divisionId);
   } catch (error) {
-    console.error('Error in generateTimetableForDivision:', error);
+    console.error("Error in generateTimetableForDivision:", error);
     throw error;
   }
 };
@@ -312,25 +359,25 @@ export const generateTimetableForDivision = (data, divisionId) => {
  */
 export const validateTimetableData = (data) => {
   const errors = [];
-  
+
   if (!data.faculties || data.faculties.length === 0) {
-    errors.push('No faculties available');
+    errors.push("No faculties available");
   }
-  
+
   if (!data.subjects || data.subjects.length === 0) {
-    errors.push('No subjects available');
+    errors.push("No subjects available");
   }
-  
+
   if (!data.classrooms || data.classrooms.length === 0) {
-    errors.push('No classrooms available');
+    errors.push("No classrooms available");
   }
-  
+
   if (!data.timeSlots || data.timeSlots.length === 0) {
-    errors.push('No time slots available');
+    errors.push("No time slots available");
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
