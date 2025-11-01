@@ -329,7 +329,7 @@ export class TimetableGenerator {
 
     // 2. Maximum two lab SUBJECTS per day (not slots)
     if (requirement.type === SUBJECT_TYPES.LAB) {
-      if (!labSubjects.has(requirement.subjectId) && labSubjects.size >= 2) {
+      if (!labSubjects.has(requirement.subjectId) && labSubjects.size >= 1) {
         return false;
       }
     }
