@@ -78,15 +78,41 @@ const TimeSlotManagement = () => {
     });
   };
 
+  // UPDATED: Generate time options with 10-minute intervals to support 50-minute lectures
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 8; hour <= 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
+      for (let minute = 0; minute < 60; minute += 10) { // Changed from 30 to 10
         const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         options.push(timeStr);
       }
     }
     return options;
+  };
+
+  // ADDED: Quick preset buttons for common 50-minute lecture patterns
+  const addPresetSlots = () => {
+    const presetSlots = [
+      { startTime: '09:00', endTime: '09:50', isLunch: false },
+      { startTime: '10:00', endTime: '10:50', isLunch: false },
+      { startTime: '11:00', endTime: '11:50', isLunch: false },
+      { startTime: '12:00', endTime: '12:50', isLunch: false },
+      { startTime: '12:50', endTime: '13:40', isLunch: true },  // Lunch
+      { startTime: '13:40', endTime: '14:30', isLunch: false },
+      { startTime: '14:40', endTime: '15:30', isLunch: false },
+      { startTime: '15:40', endTime: '16:30', isLunch: false }
+    ];
+
+    const newSlots = presetSlots.map((slot, index) => ({
+      id: `preset_${Date.now()}_${index}`,
+      ...slot
+    }));
+
+    const updatedSlots = [...timeSlots, ...newSlots];
+    updatedSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    
+    saveTimeSlots(updatedSlots);
+    alert('50-minute lecture slots added successfully!');
   };
 
   const timeOptions = generateTimeOptions();
@@ -95,7 +121,15 @@ const TimeSlotManagement = () => {
     <div className="timeslot-management">
       <div className="table-header">
         <h2>Time Slot Management</h2>
-        <button onClick={() => setShowForm(true)}>Add Time Slot</button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button onClick={() => setShowForm(true)}>Add Time Slot</button>
+          <button 
+            onClick={addPresetSlots}
+            style={{ background: '#28a745', color: 'white' }}
+          >
+            Add 50-min Lecture Slots
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -105,12 +139,23 @@ const TimeSlotManagement = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Start Time:</label>
+                {/* UPDATED: Use HTML time input for more flexibility */}
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => setFormData(prev => ({...prev, startTime: e.target.value}))}
+                  min="08:00"
+                  max="18:00"
+                  step="300" // 5-minute steps
+                  required
+                />
+                {/* Fallback dropdown for browsers that don't support time input well */}
                 <select
                   value={formData.startTime}
                   onChange={(e) => setFormData(prev => ({...prev, startTime: e.target.value}))}
-                  required
+                  style={{ marginTop: '0.5rem' }}
                 >
-                  <option value="">Select Start Time</option>
+                  <option value="">Or select from dropdown</option>
                   {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {formatTime(time)}
@@ -120,12 +165,23 @@ const TimeSlotManagement = () => {
               </div>
               <div className="form-group">
                 <label>End Time:</label>
+                {/* UPDATED: Use HTML time input for more flexibility */}
+                <input
+                  type="time"
+                  value={formData.endTime}
+                  onChange={(e) => setFormData(prev => ({...prev, endTime: e.target.value}))}
+                  min="08:00"
+                  max="18:00"
+                  step="300" // 5-minute steps
+                  required
+                />
+                {/* Fallback dropdown */}
                 <select
                   value={formData.endTime}
                   onChange={(e) => setFormData(prev => ({...prev, endTime: e.target.value}))}
-                  required
+                  style={{ marginTop: '0.5rem' }}
                 >
-                  <option value="">Select End Time</option>
+                  <option value="">Or select from dropdown</option>
                   {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {formatTime(time)}
@@ -142,6 +198,43 @@ const TimeSlotManagement = () => {
                   />
                   Lunch Break
                 </label>
+              </div>
+            </div>
+
+            {/* ADDED: Quick duration buttons */}
+            <div className="form-group">
+              <label>Quick Duration:</label>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (formData.startTime) {
+                      const [hours, minutes] = formData.startTime.split(':');
+                      const startDate = new Date(`2000-01-01T${formData.startTime}`);
+                      const endDate = new Date(startDate.getTime() + 50 * 60000); // Add 50 minutes
+                      const endTime = endDate.toTimeString().slice(0, 5);
+                      setFormData(prev => ({...prev, endTime}));
+                    }
+                  }}
+                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                >
+                  +50 min
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (formData.startTime) {
+                      const [hours, minutes] = formData.startTime.split(':');
+                      const startDate = new Date(`2000-01-01T${formData.startTime}`);
+                      const endDate = new Date(startDate.getTime() + 60 * 60000); // Add 60 minutes
+                      const endTime = endDate.toTimeString().slice(0, 5);
+                      setFormData(prev => ({...prev, endTime}));
+                    }
+                  }}
+                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                >
+                  +60 min
+                </button>
               </div>
             </div>
 
@@ -175,7 +268,14 @@ const TimeSlotManagement = () => {
                 <tr key={slot.id} className={slot.isLunch ? 'lunch-row' : ''}>
                   <td>{formatTime(slot.startTime)}</td>
                   <td>{formatTime(slot.endTime)}</td>
-                  <td>{durationMinutes} minutes</td>
+                  <td>
+                    <span style={{ 
+                      color: durationMinutes === 50 ? '#28a745' : 'inherit',
+                      fontWeight: durationMinutes === 50 ? 'bold' : 'normal'
+                    }}>
+                      {durationMinutes} minutes
+                    </span>
+                  </td>
                   <td>
                     {slot.isLunch ? (
                       <span className="type-badge lunch">Lunch Break</span>
@@ -209,6 +309,10 @@ const TimeSlotManagement = () => {
         <p>Total Slots: {timeSlots.length}</p>
         <p>Lecture Slots: {timeSlots.filter(s => !s.isLunch).length}</p>
         <p>Lunch Breaks: {timeSlots.filter(s => s.isLunch).length}</p>
+        <p>50-minute Slots: {timeSlots.filter(s => {
+          const duration = new Date(`2000-01-01T${s.endTime}`) - new Date(`2000-01-01T${s.startTime}`);
+          return (duration / (1000 * 60)) === 50;
+        }).length}</p>
       </div>
     </div>
   );
