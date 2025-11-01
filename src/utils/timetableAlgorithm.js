@@ -172,7 +172,6 @@ export class TimetableGenerator {
       return null;
     }
 
-    // FIXED: Add validation for duration vs available slots
     if (requirement.duration > this.timeSlots.length) {
       console.warn(
         `Subject ${requirement.subject.name} requires ${requirement.duration} slots but only ${this.timeSlots.length} available`
@@ -180,22 +179,57 @@ export class TimetableGenerator {
       return null;
     }
 
+    // FIXED: Get all time slots including lunch to check for breaks
+    const allTimeSlots = this.timeSlots.concat(
+      (this.constructor.arguments?.[0]?.timeSlots || []).filter(
+        (slot) => slot.isLunch
+      )
+    );
+
+    // Sort all slots by start time to maintain order
+    allTimeSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
     // Try to find consecutive slots for multi-duration subjects
     for (const day of DAYS_OF_WEEK) {
       for (let i = 0; i <= this.timeSlots.length - requirement.duration; i++) {
         const slotsNeeded = [];
+        let hasLunchBreak = false;
 
-        // Check if we have enough consecutive slots
+        // Check if we have enough consecutive slots WITHOUT lunch break
         for (let j = 0; j < requirement.duration; j++) {
           const slot = this.timeSlots[i + j];
           if (!slot || schedule[day][slot.id].occupied) {
             break;
           }
+
+          // FIXED: Check if there's a lunch break between current and next slot
+          if (j < requirement.duration - 1) {
+            const currentSlot = this.timeSlots[i + j];
+            const nextSlot = this.timeSlots[i + j + 1];
+
+            // Check if there's a lunch slot between current and next slot
+            const currentEndTime = currentSlot.endTime;
+            const nextStartTime = nextSlot.startTime;
+
+            // Find if any lunch slot exists between these times
+            const lunchSlotBetween = allTimeSlots.find(
+              (s) =>
+                s.isLunch &&
+                s.startTime >= currentEndTime &&
+                s.endTime <= nextStartTime
+            );
+
+            if (lunchSlotBetween) {
+              hasLunchBreak = true;
+              break;
+            }
+          }
+
           slotsNeeded.push(slot);
         }
 
-        // If we found enough consecutive slots
-        if (slotsNeeded.length === requirement.duration) {
+        // FIXED: Only proceed if we have enough slots AND no lunch break
+        if (slotsNeeded.length === requirement.duration && !hasLunchBreak) {
           // Find available faculty for all these slots
           const faculty = availableFaculties.find((f) =>
             slotsNeeded.every((slot) =>
@@ -214,7 +248,6 @@ export class TimetableGenerator {
 
           if (!classroom) continue;
 
-          // FIXED: Always return timeSlots as array for consistency
           return {
             day,
             timeSlots: slotsNeeded,
@@ -299,7 +332,9 @@ export class TimetableGenerator {
     timeSlots.forEach((timeSlot, index) => {
       entries.push({
         // FIXED: More reliable ID generation
-        id: `entry_${divisionId}_${slot.day}_${timeSlot.id}_${index}_${Date.now()}`,
+        id: `entry_${divisionId}_${slot.day}_${
+          timeSlot.id
+        }_${index}_${Date.now()}`,
         divisionId,
         day: slot.day,
         timeSlotId: timeSlot.id,
