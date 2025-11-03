@@ -286,17 +286,17 @@ class AuthService {
     return [
       {
         role: 'Admin',
-        email: 'admin@college.edu',
+        email: 'tweeanjalirawat@gmail.com',
         password: 'admin123'
       },
       {
         role: 'Faculty (Monitor)',
-        email: 'rajesh.kumar@college.edu',
+        email: 'mitali.bhatt@college.edu',
         password: 'faculty123'
       },
       {
         role: 'Faculty (Non-Monitor)',
-        email: 'vikram.singh@college.edu',
+        email: 'praveen.kumar@college.edu',
         password: 'faculty123'
       },
       {

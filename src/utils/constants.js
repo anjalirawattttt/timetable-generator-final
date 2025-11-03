@@ -134,7 +134,7 @@ export const STORAGE_KEYS = {
 export const DEFAULT_ADMIN = {
   id: "admin_001",
   name: "System Administrator",
-  email: "admin@college.edu",
+  email: "tweeanjalirawat@gmail.com",
   role: USER_ROLES.ADMIN,
   password: "admin123",
 };

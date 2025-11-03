@@ -70,7 +70,7 @@ const GenerateMonitoringTimetable = () => {
 
       // Generate entries for ALL days
       const entries = [];
-      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday"];
       let subjectIndex = 0;
 
       // FIXED: Ensure we generate for all days

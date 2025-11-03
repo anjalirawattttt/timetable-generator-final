@@ -11,120 +11,140 @@ import {
 // Sample Subjects
 export const MOCK_SUBJECTS = [
   {
-    id: 'sub_001',
-    name: 'Data Structures and Algorithms',
-    code: 'CS201',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 4,
-    duration: 1
+    id : "sub_001",
+    name : "Database Management System",
+    code : "BCS-501",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_002',
-    name: 'Database Management Systems',
-    code: 'CS202',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 3,
-    duration: 1
+    id : "sub_002",
+    name : "Web Technology",
+    code : "BCS-502",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_003',
-    name: 'Data Structures Lab',
-    code: 'CS201L',
-    type: SUBJECT_TYPES.LAB,
-    lecturesPerWeek: 2,
-    duration: 2 // 2-hour lab sessions
+    id : "sub_003",
+    name : "Design and Analysis of Algorithm",
+    code : "BCS-503",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_004',
-    name: 'DBMS Lab',
-    code: 'CS202L',
-    type: SUBJECT_TYPES.LAB,
-    lecturesPerWeek: 2,
-    duration: 2
+    id : "sub_004",
+    name : "OOSD with C++",
+    code : "BCS-054",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_005',
-    name: 'Operating Systems',
-    code: 'CS203',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 4,
-    duration: 1
+    id : "sub_005",
+    name : "Machine Learning Techniques",
+    code : "BCS-055",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_006',
-    name: 'Computer Networks',
-    code: 'CS204',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 3,
-    duration: 1
+    id : "sub_006",
+    name : "Constitution of India, Law & Engineering",
+    code : "BNC-501",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 2,
+    duration : 1
   },
   {
-    id: 'sub_007',
-    name: 'Operating Systems Lab',
-    code: 'CS203L',
-    type: SUBJECT_TYPES.LAB,
-    lecturesPerWeek: 2,
-    duration: 2
+    id : "sub_007",
+    name : "Data Encryption and Compression",
+    code : "HTCS-501",
+    type : SUBJECT_TYPES.THEORY,
+    lecturesPerWeek : 3,
+    duration : 1
   },
   {
-    id: 'sub_008',
-    name: 'Web Development',
-    code: 'CS205',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 3,
-    duration: 1
+    id: "sub_008",
+    name : "Database Management System Lab",
+    code : "BCS-551",
+    type : SUBJECT_TYPES.LAB ,
+    lecturesPerWeek : 1,
+    duration : 2
   },
   {
-    id: 'sub_009',
-    name: 'Web Development Lab',
-    code: 'CS205L',
-    type: SUBJECT_TYPES.LAB,
-    lecturesPerWeek: 2,
-    duration: 2
+    id: "sub_009",
+    name : "Web Technology Lab",
+    code : "BCS-552",
+    type : SUBJECT_TYPES.LAB ,
+    lecturesPerWeek : 1,
+    duration : 2
   },
   {
-    id: 'sub_010',
-    name: 'Software Engineering',
-    code: 'CS206',
-    type: SUBJECT_TYPES.THEORY,
-    lecturesPerWeek: 3,
-    duration: 1
+    id: "sub_010",
+    name : "Design and Analysis of Algorithm Lab",
+    code : "BCS-553",
+    type : SUBJECT_TYPES.LAB ,
+    lecturesPerWeek : 1,
+    duration : 2
+  },
+  {
+    id: "sub_011",
+    name : "Mini Project or Internship Assessment",
+    code : "BCS-554",
+    type : SUBJECT_TYPES.LAB ,
+    lecturesPerWeek : 1,
+    duration : 2
+  },
+  {
+    id: "sub_012",
+    name : "Technical Training",
+    code : null ,
+    type : SUBJECT_TYPES.TECHNICAL_TRAINING ,
+    lecturesPerWeek : 5,
+    duration : 2
   }
 ];
 
-// Sample Classrooms
+
 export const MOCK_CLASSROOMS = [
-  // Theory classrooms
   {
-    id: 'room_001',
-    name: 'Room 101',
-    type: 'Theory',  // Make sure this matches CLASSROOM_TYPES.THEORY
-    capacity: 60
+    id : "lab_001",
+    name : "LAB 1",
+    type : CLASSROOM_TYPES.LAB,
+    capacity : 60
   },
   {
-    id: 'room_002',
-    name: 'Room 102', 
-    type: 'Theory',
-    capacity: 60
-  },
-  // Lab classrooms - INCREASE CAPACITY
-  {
-    id: 'lab_001',
-    name: 'Computer Lab A',
-    type: 'Lab',  // Make sure this matches CLASSROOM_TYPES.LAB
-    capacity: 60  // INCREASED from 30 to 60
+    id : "lab_002",
+    name : "LAB 2",
+    type : CLASSROOM_TYPES.LAB,
+    capacity : 60
   },
   {
-    id: 'lab_002',
-    name: 'Computer Lab B',
-    type: 'Lab',
-    capacity: 60  // INCREASED from 35 to 60
+    id : "room_001",
+    name : "ROOM 124",
+    type : CLASSROOM_TYPES.THEORY,
+    capacity : 60
   },
   {
-    id: 'lab_003',
-    name: 'Computer Lab C',
-    type: 'Lab',
-    capacity: 60  // INCREASED from 40 to 60
+    id : "room_002",
+    name : "ROOM 125",
+    type : CLASSROOM_TYPES.THEORY,
+    capacity : 60
+  },
+  {
+    id : "TT_001",
+    name : "TT 205",
+    type : CLASSROOM_TYPES.TECHNICAL_TRAINING,
+    capacity : 60
+  },
+  {
+    id : "TT_002",
+    name : "TT 208",
+    type : CLASSROOM_TYPES.TECHNICAL_TRAINING,
+    capacity : 60
   }
 ];
 
@@ -134,9 +154,9 @@ export const MOCK_DIVISIONS = [
   {
     id: 'div_001',
     name: 'CS-A',
-    monitorFacultyId: 'fac_001',
-    studentCount: 30,
-    subjects: ['sub_001', 'sub_002', 'sub_003', 'sub_004', 'sub_005', 'sub_007']
+    monitorFacultyId: 'fac_002',
+    studentCount: 60,
+    subjects: ['sub_001', 'sub_002', 'sub_003', 'sub_004', 'sub_005', 'sub_008','sub_009']
   },
   {
     id: 'div_002',
@@ -165,54 +185,54 @@ export const MOCK_DIVISIONS = [
 export const MOCK_FACULTIES = [
   {
     id: 'fac_001',
-    name: 'Dr. Rajesh Kumar',
-    email: 'rajesh.kumar@college.edu',
-    subjects: ['sub_001', 'sub_003'], // DSA Theory & Lab
-    monitoringDivision: 'div_001',
+    name: 'Dr. Praveen Kumar Rai',
+    email: 'praveen.kumar@college.edu',
+    subjects: ['sub_001', 'sub_008'], 
+    monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   },
   {
     id: 'fac_002',
-    name: 'Prof. Priya Sharma',
-    email: 'priya.sharma@college.edu',
-    subjects: ['sub_002', 'sub_004'], // DBMS Theory & Lab
-    monitoringDivision: 'div_002',
+    name: 'Ms. Mitali Bhatt',
+    email: 'mitali.bhatt@college.edu',
+    subjects: ['sub_002', 'sub_009'], 
+    monitoringDivision: 'div_001',
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   },
   {
     id: 'fac_003',
-    name: 'Dr. Amit Patel',
-    email: 'amit.patel@college.edu',
-    subjects: ['sub_005', 'sub_007'], // OS Theory & Lab
-    monitoringDivision: 'div_003',
+    name: 'Dr. Sansar Chauhan',
+    email: 'sansar.chauhan@college.edu',
+    subjects: ['sub_003', 'sub_010'], 
+    monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   },
   {
     id: 'fac_004',
-    name: 'Prof. Sneha Gupta',
-    email: 'sneha.gupta@college.edu',
-    subjects: ['sub_006'], // Computer Networks
-    monitoringDivision: 'div_004',
+    name: 'Mr. Nikhill',
+    email: 'nikhill@college.edu',
+    subjects: ['sub_004','sub_011'], // Computer Networks
+    monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   },
   {
     id: 'fac_005',
-    name: 'Dr. Vikram Singh',
-    email: 'vikram.singh@college.edu',
-    subjects: ['sub_008', 'sub_009'], // Web Development Theory & Lab
+    name: 'Mr. Sanjay Babu',
+    email: 'sanjay.babu@college.edu',
+    subjects: ['sub_005'], // Web Development Theory & Lab
     monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   },
   {
     id: 'fac_006',
-    name: 'Prof. Kavita Joshi',
-    email: 'kavita.joshi@college.edu',
-    subjects: ['sub_010'], // Software Engineering
+    name: 'Mr. Pagal',
+    email: 'pagal@college.edu',
+    subjects: ['sub_006'], 
     monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
@@ -221,12 +241,13 @@ export const MOCK_FACULTIES = [
     id: 'fac_007',
     name: 'Dr. Suresh Reddy',
     email: 'suresh.reddy@college.edu',
-    subjects: ['sub_001', 'sub_005'], // DSA & OS (backup faculty)
+    subjects: ['sub_012'], 
     monitoringDivision: null,
     password: 'faculty123',
     role: USER_ROLES.FACULTY
   }
 ];
+
 
 // Sample Students (for login testing)
 export const MOCK_STUDENTS = [
